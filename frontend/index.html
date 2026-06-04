@@ -1,119 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Billing — Vegetable Store</title>
-  <meta name="description" content="Send WhatsApp bills to customers of Vegetable Store, Soura Srinagar" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-<!-- TOP HEADER -->
-<header class="page-header">
-  <div class="store-icon">🥦</div>
-  <div class="header-text">
-    <h1>Vegetable Store</h1>
-    <p>Soura, Srinagar</p>
-  </div>
-  <div class="header-actions">
-    <button class="icon-btn" id="dateBtn" title="Change Date">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-    </button>
-  </div>
-</header>
-
-<!-- DATE PICKER (hidden) -->
-<input type="date" id="billDateInput" style="display:none" />
-
-<!-- MAIN CONTENT -->
-<main class="main-content">
-
-  <!-- Date display -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-    <div>
-      <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Bill Date</div>
-      <div id="dateDisplay" style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-top:2px;">—</div>
-    </div>
-    <div id="customerCount" style="font-size:0.8rem;color:var(--text-secondary);"></div>
-  </div>
-
-  <!-- Search -->
-  <div class="search-bar">
-    <span class="search-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    </span>
-    <input type="text" id="searchInput" placeholder="Search customers..." autocomplete="off" />
-  </div>
-
-  <!-- Customer list -->
-  <div id="customerList">
-    <div class="empty-state">
-      <div class="empty-icon">⏳</div>
-      <p>Loading customers...</p>
-    </div>
-  </div>
-
-</main>
-
-<!-- BILL PREVIEW (off-screen for html2canvas) -->
-<div id="billPreview">
-  <div class="bill-header">
-    <h2>🥦 Vegetable Store</h2>
-    <p>Main Market, Soura Srinagar</p>
-    <p>PIN: 190011</p>
-  </div>
-  <div class="bill-row"><span>Customer:</span><strong id="bp-name"></strong></div>
-  <div class="bill-row"><span>Date:</span><span id="bp-date"></span></div>
-  <div class="bill-amount">₹ <span id="bp-amount">0</span> /-</div>
-  <div class="bill-section-title">Payment Options</div>
-  <div class="payment-logos">
-    <img src="gpay.png" alt="GPay" />
-    <img src="paytm.png" alt="Paytm" />
-    <img src="phonepay.png" alt="PhonePe" />
-  </div>
-  <img src="paymentqr.jpg" alt="QR Code" class="qr-img" />
-  <div class="bill-section-title">Bank Transfer</div>
-  <div class="bill-row" style="font-size:0.78rem"><span>Bank:</span><span>J&K Bank</span></div>
-  <div class="bill-row" style="font-size:0.78rem"><span>Name:</span><span>JAVID AHMAD TELI</span></div>
-  <div class="bill-row" style="font-size:0.78rem"><span>A/C:</span><span>0601010100000453</span></div>
-  <div class="bill-row" style="font-size:0.78rem"><span>IFSC:</span><span>JAKA01NAGGAM</span></div>
-  <div class="bill-row" style="font-size:0.78rem"><span>UPI Phone:</span><span>7006889841</span></div>
-  <div class="bill-footer">
-    <p>Thank you for shopping with us!</p>
-    <p>Contact: +91-70068-89841</p>
-    <p>Note: Please send screenshot of payment</p>
-  </div>
-</div>
-
-<!-- LOADING OVERLAY -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Generating bill...</div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <a class="nav-item active" href="index.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
-    <span>Billing</span>
-  </a>
-  <a class="nav-item" href="customers.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Customers</span>
-  </a>
-  <a class="nav-item" href="history.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>History</span>
-  </a>
-  <a class="nav-item" href="admin.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    <span>Admin</span>
-  </a>
-</nav>
-
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="js/config.js"></script>
-<script src="js/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
