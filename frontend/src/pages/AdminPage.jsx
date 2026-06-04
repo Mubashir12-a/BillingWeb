@@ -132,6 +132,26 @@ export default function AdminPage() {
     } catch { showToast('Server error', 'error') }
   }
 
+  async function clearAllHistory() {
+    const confirmation = prompt('Type "ERASE" to confirm deleting all billing history. This cannot be undone:');
+    if (confirmation !== 'ERASE') {
+      showToast('Erase cancelled', 'warning');
+      return;
+    }
+    try {
+      const res = await fetch(`${API.bills}/actions/clear-all`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        showToast('All bill history erased!', 'success');
+        loadDashboard();
+      } else {
+        showToast(json.message || 'Erase failed', 'error');
+      }
+    } catch {
+      showToast('Server error during erase', 'error');
+    }
+  }
+
   const filteredManage = customers.filter(c =>
     c.name.toLowerCase().includes(manageSearch.toLowerCase()) || c.phone.includes(manageSearch)
   )
@@ -227,6 +247,25 @@ export default function AdminPage() {
             ))}
           </>
         )}
+
+        {/* Danger Zone */}
+        <div style={{ marginTop: '36px', borderTop: '1px solid rgba(239,68,68,0.2)', paddingTop: '20px' }}>
+          <div className="section-label" style={{ color: 'var(--danger)', margin: '0 0 12px 4px' }}>Danger Zone</div>
+          <div className="card" style={{ borderColor: 'rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.02)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Delete all sent bills and transaction history permanently. Customers and contact details are not affected.
+              </div>
+              <button 
+                className="btn btn-danger btn-full btn-sm" 
+                onClick={clearAllHistory}
+                style={{ marginTop: '8px' }}
+              >
+                🗑️ Erase All Bill History
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Edit Modal */}

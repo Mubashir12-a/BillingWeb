@@ -79,6 +79,16 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE all bills (Clear history)
+router.delete('/actions/clear-all', async (req, res) => {
+  try {
+    await Bill.deleteMany({});
+    res.json({ success: true, message: 'All bill history deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // DELETE a bill record
 router.delete('/:id', async (req, res) => {
   try {
