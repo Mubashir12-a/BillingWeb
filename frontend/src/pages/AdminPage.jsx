@@ -24,6 +24,9 @@ export default function AdminPage() {
   const [editModal, setEditModal] = useState(null) // { _id, name, phone, notes }
   const [saving, setSaving] = useState(false)
 
+  // Custom alert/confirm/prompt dialog
+  const [dialog, setDialog] = useState(null) // { type: 'confirm' | 'prompt', message, expectedText, onConfirm, inputValue }
+
   function showToast(message, type = 'success') { setToast({ message, type }) }
 
   // PIN
@@ -118,38 +121,48 @@ export default function AdminPage() {
     setSaving(false)
   }
 
-  async function deleteCustomer() {
-    if (!confirm(`Remove "${editModal.name}"?`)) return
-    try {
-      const res = await fetch(`${API.customers}/${editModal._id}`, { method: 'DELETE' })
-      const json = await res.json()
-      if (json.success) {
-        showToast(`${editModal.name} removed`, 'warning')
-        const updated = customers.filter(c => c._id !== editModal._id)
-        setCustomers(updated); setStats(s => ({ ...s, customers: updated.length }))
-        setEditModal(null)
-      } else { showToast('Delete failed', 'error') }
-    } catch { showToast('Server error', 'error') }
+  function deleteCustomer() {
+    setDialog({
+      type: 'confirm',
+      message: `Are you sure you want to remove "${editModal.name}"? This will permanently delete their record.`,
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API.customers}/${editModal._id}`, { method: 'DELETE' })
+          const json = await res.json()
+          if (json.success) {
+            showToast(`${editModal.name} removed`, 'warning')
+            const updated = customers.filter(c => c._id !== editModal._id)
+            setCustomers(updated); setStats(s => ({ ...s, customers: updated.length }))
+            setEditModal(null)
+          } else { showToast('Delete failed', 'error') }
+        } catch { showToast('Server error', 'error') }
+        setDialog(null)
+      }
+    })
   }
 
-  async function clearAllHistory() {
-    const confirmation = prompt('Type "ERASE" to confirm deleting all billing history. This cannot be undone:');
-    if (confirmation !== 'ERASE') {
-      showToast('Erase cancelled', 'warning');
-      return;
-    }
-    try {
-      const res = await fetch(`${API.bills}/actions/clear-all`, { method: 'DELETE' });
-      const json = await res.json();
-      if (json.success) {
-        showToast('All bill history erased!', 'success');
-        loadDashboard();
-      } else {
-        showToast(json.message || 'Erase failed', 'error');
+  function clearAllHistory() {
+    setDialog({
+      type: 'prompt',
+      message: 'Type "ERASE" to confirm deleting all billing history. This action is permanent and cannot be undone.',
+      expectedText: 'ERASE',
+      inputValue: '',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${API.bills}/actions/clear-all`, { method: 'DELETE' })
+          const json = await res.json()
+          if (json.success) {
+            showToast('All bill history erased!', 'success')
+            loadDashboard()
+          } else {
+            showToast(json.message || 'Erase failed', 'error')
+          }
+        } catch {
+          showToast('Server error during erase', 'error')
+        }
+        setDialog(null)
       }
-    } catch {
-      showToast('Server error during erase', 'error');
-    }
+    })
   }
 
   const filteredManage = customers.filter(c =>
@@ -284,6 +297,61 @@ export default function AdminPage() {
             <div style={{ display:'flex', gap:10, marginTop:4 }}>
               <button className="btn btn-primary" style={{ flex:1 }} onClick={saveEdit} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
               <button className="btn btn-danger btn-sm" onClick={deleteCustomer}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert/Confirm/Prompt Dialog */}
+      {dialog && (
+        <div className="modal-overlay show" style={{ zIndex: 1000, alignItems: 'center' }}>
+          <div className="modal" style={{ borderRadius: 'var(--radius)', maxWidth: '400px', margin: '20px', padding: '24px 20px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            <div className="modal-header" style={{ marginBottom: '14px', borderBottom: 'none', padding: 0 }}>
+              <span className="modal-title" style={{ fontSize: '1.1rem', color: 'var(--danger)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚠️ Danger Action
+              </span>
+            </div>
+            <div style={{ fontSize: '0.88rem', color: 'var(--text-primary)', marginBottom: '20px', lineHeight: '1.5', textAlign: 'left' }}>
+              {dialog.message}
+            </div>
+            
+            {dialog.type === 'prompt' && (
+              <input
+                type="text"
+                className="form-input"
+                style={{ marginBottom: '20px', textTransform: 'uppercase', textAlign: 'center', fontSize: '1rem', letterSpacing: '0.05em', borderBottomColor: 'var(--danger)' }}
+                placeholder={dialog.expectedText}
+                value={dialog.inputValue}
+                onChange={e => setDialog(d => ({ ...d, inputValue: e.target.value }))}
+                autoFocus
+              />
+            )}
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                className="btn btn-secondary" 
+                style={{ flex: 1, padding: '10px' }} 
+                onClick={() => setDialog(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-danger" 
+                style={{ flex: 1, padding: '10px' }} 
+                onClick={() => {
+                  if (dialog.type === 'prompt') {
+                    if (dialog.inputValue.trim().toUpperCase() !== dialog.expectedText) {
+                      showToast('Confirmation mismatch', 'error');
+                      return;
+                    }
+                    dialog.onConfirm();
+                  } else {
+                    dialog.onConfirm();
+                  }
+                }}
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>
